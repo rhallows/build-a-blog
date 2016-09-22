@@ -9,9 +9,8 @@
          <h1>/Tight Blog Collective/</h1>         
              <hr>
              {% for post in  posts %}
-
                 <div class="posts">
-                    <div class="blog-title">{{post.title}}</div>
+                    <div class="blog-title"><a href="/blog/{{post.key().id()}}"> {{post.title}} </a> </div>                   
                     <pre class="blog-body">{{post.blogPost}}</pre>
                     <hr>
                 </div>

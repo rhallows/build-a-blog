@@ -19,7 +19,6 @@ import os
 import jinja2
 import cgi
 
-
 from google.appengine.ext import db
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
@@ -60,17 +59,27 @@ class MainHandler(Handler):
             p = blog_posts(title = title, blogPost = blogPost)
             p.put()
 
-            self.redirect('/blog')
+            self.redirect('/blog/p.key().id()')
         else:
             error = "We need both a title and a blog post!"
             self.render("front.html", error = error, title=title, blogPost=blogPost)
 
 class BlogRouteHandler(Handler):
     def render_blog(self, title="", blogPost=""):
-        posts = db.GqlQuery("SELECT * FROM blog_posts ORDER BY created DESC")
+        posts = db.GqlQuery("SELECT * FROM blog_posts ORDER BY created DESC LIMIT 5")
         self.render("blog.html", title=title, blogPost=blogPost, posts=posts)
 
     def get(self):
         self.render_blog()
 
-app = webapp2.WSGIApplication([('/', MainHandler), ('/blog', BlogRouteHandler)], debug=True)
+class ViewPostHandler(Handler):
+    def get(self, id):
+        post = blog_posts.get_by_id(long(id))
+
+        self.render("viewPost.html", title=post.title, blogPost=post.blogPost, post=post)
+
+
+app = webapp2.WSGIApplication([webapp2.Route('/', MainHandler),
+                               webapp2.Route('/blog', BlogRouteHandler),
+                               webapp2.Route('/blog/<id:\d+>', ViewPostHandler)
+                               ], debug=True)
